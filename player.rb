@@ -1,57 +1,33 @@
-# Class that determines a player (parent class for person and AI)
+require_relative './hand.rb'
+require_relative './card.rb'
+
+# Class that determines a player itself
 class Player
-  NO_SUCH_CHOICE = 'Варианта с таким номером нет'.freeze
-
-  attr_reader :cards
-
-  def initialize(game, name = 'Dealer')
-    @game = game
+  def initialize(name = 'Dealer')
     @name = name
+    @hand = Hand.new
     @balance = 100
-    @cards = []
-    2.times { @cards << @game.pile.take_card }
-  end
-
-  def decide(decision)
-    case decision
-    when 1 then skip
-    when 2 then add_card
-    when 3 then open_cards
-    else raise NO_SUCH_CHOICE
-    end
-  end
-
-  def discard
-    @cards.each { |card| @game.pile.discard(card) }
   end
 
   def to_s
-    "#{@name}: #{print_cards}Сумма очков: #{count_points}"
+    "#{@name}: #{@hand.print_cards} Сумма очков: #{@hand.score}"
   end
 
-  private
-
-  def print_cards
-    output = ''
-    @cards.each { |card| output += card.to_s + ' ' }
-    output
+  def points
+    @hand.score
   end
 
-  def count_points
-    total_points = 0
-    @cards.each { |card| total_points += card.weight }
-    total_points
+  def can_take_card?
+    return false if @hand.cards.length == 3
+
+    true
   end
 
-  def skip
-    @game.skip_turn
+  def take_card(deck)
+    @hand << deck.take_card
   end
 
-  def add_card
-    @cards << @game.pile.take_card
-  end
-
-  def open_cards
-    @game.open_cards
+  def bet
+    @balance -= 10
   end
 end
