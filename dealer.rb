@@ -1,10 +1,10 @@
 require_relative './player.rb'
 
-# That class inherits from player and contains minor stuff for displaying :)
+# This is a dealer
 class Dealer < Player
   attr_writer :opened_cards
 
-  def initialize
+  def initialize(name = 'Dealer')
     @opened_cards = false
     super
   end

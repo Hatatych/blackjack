@@ -1,33 +1,40 @@
 require_relative './hand.rb'
-require_relative './card.rb'
 
-# Class that determines a player itself
+# This class handle player's logic
 class Player
+  attr_reader :name, :balance
+
   def initialize(name = 'Dealer')
     @name = name
+    @balance = GameRules::INIT_MONEY
     @hand = Hand.new
-    @balance = 100
-  end
-
-  def to_s
-    "#{@name}: #{@hand.print_cards} Сумма очков: #{@hand.score}"
-  end
-
-  def points
-    @hand.score
-  end
-
-  def can_take_card?
-    return false if @hand.cards.length == 3
-
-    true
   end
 
   def take_card(deck)
     @hand << deck.take_card
   end
 
+  def discard
+    @hand.discard
+  end
+
+  def to_s
+    "#{@name}: #{@hand.print_cards} Сумма очков: #{@hand.score}"
+  end
+
+  def score
+    @hand.score
+  end
+
+  def busted?
+    return true if @balance < GameRules::DEFAULT_BET
+  end
+
   def bet
-    @balance -= 10
+    @balance -= GameRules::DEFAULT_BET
+  end
+
+  def jackpot(amount)
+    @balance += amount
   end
 end
