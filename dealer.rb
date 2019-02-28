@@ -11,7 +11,7 @@ class Dealer < Player
 
   def to_s
     if !@opened_cards
-      'Ты не видишь карт дилера'
+      "У дилера #{@hand.cards.length} карты, но ты их не видишь"
     else
       super
     end

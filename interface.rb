@@ -45,6 +45,14 @@ class Interface
     puts '2. Нет'
   end
 
+  def bye
+    puts InterfaceMessages::BYE
+  end
+
+  def invalid_choice
+    raise InterfaceMessages::NO_SUCH_CHOICE
+  end
+
   private
 
   def print_players

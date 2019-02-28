@@ -30,11 +30,17 @@ class Player
     return true if @balance < GameRules::DEFAULT_BET
   end
 
-  def bet
-    @balance -= GameRules::DEFAULT_BET
+  def withdraw(amount = GameRules::DEFAULT_BET)
+    @balance -= amount
   end
 
-  def jackpot(amount)
+  def add_money(amount = GameRules::DEFAULT_BET)
     @balance += amount
+  end
+
+  def full_hand?
+    return true if @hand.cards.length == 3
+
+    false
   end
 end
