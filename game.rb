@@ -3,7 +3,6 @@ require_relative './dealer.rb'
 require_relative './round.rb'
 require_relative './deck.rb'
 require_relative './interface.rb'
-require_relative './interface_messages.rb'
 require_relative './bank.rb'
 
 # Base game class
@@ -25,21 +24,28 @@ class Game
     when 2 then exit_from_game
     else @interface.invalid_choice
     end
+  rescue RuntimeError => e
+    @interface.show_error(e.message)
+    retry
   end
 
   def start_round
     init_deal
     @game_running = true
     loop do
-      break if decide.nil?
+      break if decide == :open
 
       ai_decide
       break if @player.full_hand? && @dealer.full_hand?
     end
     final_scoring
+    @interface.reset_menu
+    @interface.continue? ? flush_and_discard : exit_from_game
   end
 
   def init_deal
+    raise Interface::BUSTED if @player.busted?
+
     @dealer.opened_cards = false
     @bank.bet(@player)
     @bank.bet(@dealer)
@@ -47,32 +53,37 @@ class Game
       @player.take_card(@deck)
       @dealer.take_card(@deck)
     end
+  rescue RuntimeError => e
+    @interface.show_error(e.message)
   end
 
   def ai_decide
-    @dealer.take_card(@deck) if @dealer.score < GameRules::DEALER_DUMMY_SCORE && @game_running && !@dealer.full_hand?
+    @dealer.take_card(@deck) if @dealer.can_take_card? && @game_running
   end
 
   def decide
     @interface.decision_menu
     case @interface.recieve_choice
     when 1 then @player.take_card(@deck)
-    when 2 then return 1
+    when 2 then return
     when 3 then end_round
     else @interface.invalid_choice
     end
+  rescue RuntimeError => e
+    @interface.show_error(e.message)
+    retry
   end
 
   def end_round
     @dealer.opened_cards = true
     final_scoring
     @game_running = false
-    nil
+    :open
   end
 
   def final_scoring
     @dealer.opened_cards = true
-    winner = who_won?
+    winner = define_winner
     if winner.nil?
       @interface.show_results
       @bank.refund(@player, @dealer)
@@ -81,11 +92,6 @@ class Game
       @bank.reward(winner)
     end
     @game_running = false
-    @interface.reset_menu
-    case @interface.recieve_choice
-    when 1 then flush_and_discard
-    when 2 then exit_from_game
-    end
   end
 
   def flush_and_discard
@@ -101,30 +107,17 @@ class Game
     exit
   end
 
-  def who_won?
-    blackjack = { player: false, dealer: false }
-    blackjack[:player] = true if @player.score >= GameRules::BLACKJACK
-    blackjack[:dealer] = true if @dealer.score >= GameRules::BLACKJACK
-
-    if !blackjack[:player] && !blackjack[:dealer]
-      if @player.score > @dealer.score && @game_running
-        @player
-      elsif @player.score < @dealer.score && @game_running
-        @dealer
-      elsif @game_running
-        nil
-      end
-    elsif blackjack[:player] && !blackjack[:dealer] || !blackjack[:player] && blackjack[:dealer]
-      if @player.score > @dealer.score
-        @dealer
-      else
-        @player
-      end
+  def define_winner
+    if @player.blackjack? && @dealer.blackjack?
+      nil
+    elsif @player.score == @dealer.score
+      nil
+    elsif @player.blackjack?
+      @dealer
+    elsif @dealer.blackjack?
+      @player
+    else
+      @player.score > @dealer.score ? @player : @dealer
     end
-  end
-
-  def refund
-    @player.jackpot(@bank / 2)
-    @dealer.jackpot(@bank / 2)
   end
 end

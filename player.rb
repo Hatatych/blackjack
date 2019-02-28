@@ -38,6 +38,12 @@ class Player
     @balance += amount
   end
 
+  def blackjack?
+    return true if score >= GameRules::BLACKJACK
+
+    false
+  end
+
   def full_hand?
     return true if @hand.cards.length == 3
 

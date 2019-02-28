@@ -1,5 +1,9 @@
 # Game interface, menus etc
 class Interface
+  NO_SUCH_CHOICE = 'Нет такого выбора!'.freeze
+  BYE = 'Всего доброго :)'.freeze
+  BUSTED = 'Не хватает денег на ставку!'.freeze
+
   def initialize(player, dealer)
     @player = player
     @dealer = dealer
@@ -46,16 +50,31 @@ class Interface
   end
 
   def bye
-    puts InterfaceMessages::BYE
+    puts BYE
   end
 
   def invalid_choice
-    raise InterfaceMessages::NO_SUCH_CHOICE
+    raise NO_SUCH_CHOICE
+  end
+
+  def continue?
+    case recieve_choice
+    when 1 then true
+    when 2 then false
+    else invalid_choice
+    end
+  end
+
+  def show_error(message)
+    puts
+    puts "Ошибка! #{message}"
+    puts
   end
 
   private
 
   def print_players
+    puts
     puts @player
     puts @dealer
     puts
