@@ -27,7 +27,7 @@ class Player
   end
 
   def busted?
-    return true if @balance < GameRules::DEFAULT_BET
+    @balance < GameRules::DEFAULT_BET
   end
 
   def withdraw(amount = GameRules::DEFAULT_BET)
@@ -39,18 +39,14 @@ class Player
   end
 
   def overage?
-    return true if score >= GameRules::BLACKJACK
-
-    false
+    score >= GameRules::BLACKJACK
   end
 
   def full_hand?
-    return true if @hand.cards.length == 3
-
-    false
+    @hand.cards.length == 3
   end
 
   def can_take_card?
-    score < GameRules::DEALER_DUMMY_SCORE && !full_hand?
+    !full_hand?
   end
 end

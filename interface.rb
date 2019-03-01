@@ -4,10 +4,11 @@ class Interface
   BYE = 'Всего доброго :)'.freeze
   BUSTED = 'Не хватает денег на ставку!'.freeze
   DEALER_BUSTED = 'Ты разорил этого казино!'.freeze
+  FULL_HAND = 'Ты не можешь взять больше карт!'.freeze
 
-  def initialize(player, dealer)
-    @player = player
-    @dealer = dealer
+  def self.ask_name
+    puts 'Как тебя зовут?'
+    gets.chomp.capitalize
   end
 
   def recieve_choice
@@ -16,35 +17,35 @@ class Interface
     gets.to_i
   end
 
-  def main_menu
-    puts "Добро пожаловать, #{@player.name}!"
-    player_with_balance
+  def main_menu(player)
+    puts "Добро пожаловать, #{player.name}!"
+    player_with_balance(player)
     puts
     puts 'Что будем делать?'
     puts '1. Начать игру!'
     puts '2. Выйти'
   end
 
-  def decision_menu
-    print_players
+  def decision_menu(player, dealer)
+    print_players(player, dealer)
     puts 'Что будем делать?'
     puts '1. Взять карту'
     puts '2. Пропустить ход'
     puts '3. Открыть карты'
   end
 
-  def show_results(player = nil)
-    print_players
-    if player.nil?
+  def show_results(player, dealer, winner = nil)
+    print_players(player, dealer)
+    if winner.nil?
       puts 'Ничья!'
       return
     else
-      puts "Победил #{player.name}!"
+      puts "Победил #{winner.name}!"
     end
   end
 
-  def reset_menu
-    player_with_balance
+  def reset_menu(player)
+    player_with_balance(player)
     puts 'Сыграем еще раз?'
     puts '1. Да'
     puts '2. Нет'
@@ -52,6 +53,14 @@ class Interface
 
   def bye
     puts BYE
+  end
+
+  def full_hand
+    raise FULL_HAND
+  end
+
+  def busted
+    raise BUSTED
   end
 
   def invalid_choice
@@ -74,15 +83,15 @@ class Interface
 
   private
 
-  def print_players
+  def print_players(player, dealer)
     puts
-    puts @player
-    puts @dealer
+    puts player
+    puts dealer
     puts
   end
 
-  def player_with_balance
-    puts "#{@player.name}, у тебя #{@player.balance}"
+  def player_with_balance(player)
+    puts "#{player.name}, у тебя #{player.balance}"
     puts
   end
 end

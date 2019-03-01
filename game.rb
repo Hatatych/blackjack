@@ -15,12 +15,12 @@ class Game
     @dealer = Dealer.new
     @bank = Bank.new
     @deck = Deck.new
-    @interface = Interface.new(@player, @dealer)
+    @interface = Interface.new
     run
   end
 
   def run
-    @interface.main_menu
+    @interface.main_menu(@player)
     case @interface.recieve_choice
     when 1 then start_round
     when 2 then exit_from_game
@@ -41,13 +41,13 @@ class Game
       break if @player.full_hand? && @dealer.full_hand?
     end
     final_scoring
-    @interface.reset_menu
+    @interface.reset_menu(@player)
     @interface.continue? ? flush_and_discard : exit_from_game
   end
 
   def init_deal
-    raise Interface::BUSTED if @player.busted?
-    raise Interface::DEALER_BUSTED if @dealer.busted?
+    @interface.busted if @player.busted?
+    @interface.busted if @dealer.busted?
 
     @dealer.opened_cards = false
     @bank.bet(@player)
@@ -66,15 +66,15 @@ class Game
   end
 
   def decide
-    @interface.decision_menu
-    case PLAYER_DECISIONS[@interface.recieve_choice - 1]
-    when :take_card then @player.take_card(@deck)
+    @interface.decision_menu(@player, @dealer)
+    player_decision = @interface.recieve_choice - 1
+    case PLAYER_DECISIONS[player_decision]
+    when :take_card then @player.can_take_card? ? @player.take_card(@deck) : @interface.full_hand
     when :skip then return
-    when :open
-      end_round
-      return :open
+    when :open then end_round
     else @interface.invalid_choice
     end
+    PLAYER_DECISIONS[player_decision]
   rescue RuntimeError => e
     @interface.show_error(e.message)
     retry
@@ -90,10 +90,10 @@ class Game
     @dealer.opened_cards = true
     winner = define_winner
     if winner.nil?
-      @interface.show_results
+      @interface.show_results(@player, @dealer)
       @bank.refund(@player, @dealer)
     else
-      @interface.show_results(winner)
+      @interface.show_results(@player, @dealer, winner)
       @bank.reward(winner)
     end
     @game_running = false
