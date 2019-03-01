@@ -38,7 +38,7 @@ class Player
     @balance += amount
   end
 
-  def blackjack?
+  def overage?
     return true if score >= GameRules::BLACKJACK
 
     false
@@ -48,5 +48,9 @@ class Player
     return true if @hand.cards.length == 3
 
     false
+  end
+
+  def can_take_card?
+    score < GameRules::DEALER_DUMMY_SCORE && !full_hand?
   end
 end

@@ -16,10 +16,4 @@ class Dealer < Player
       super
     end
   end
-
-  def can_take_card?
-    return true if score < GameRules::DEALER_DUMMY_SCORE && !full_hand?
-
-    false
-  end
 end

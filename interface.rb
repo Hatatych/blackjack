@@ -3,6 +3,7 @@ class Interface
   NO_SUCH_CHOICE = 'Нет такого выбора!'.freeze
   BYE = 'Всего доброго :)'.freeze
   BUSTED = 'Не хватает денег на ставку!'.freeze
+  DEALER_BUSTED = 'Ты разорил этого казино!'.freeze
 
   def initialize(player, dealer)
     @player = player
